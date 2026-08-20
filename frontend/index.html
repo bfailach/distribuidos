@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Sistema Distribuido</title>
+<style>
+  :root {
+    --bg: #F5F5F7;
+    --surface: #FFFFFF;
+    --border: rgba(0,0,0,0.06);
+    --text: #1D1D1F;
+    --muted: #6E6E73;
+    --muted-2: #86868B;
+    --accent: #0071E3;
+    --accent-hover: #0077ED;
+    --s1: #0071E3;
+    --s1-bg: rgba(0,113,227,0.08);
+    --s2: #AF52DE;
+    --s2-bg: rgba(175,82,222,0.10);
+    --ok: #34C759;
+    --ok-bg: rgba(52,199,89,0.10);
+    --down: #FF3B30;
+    --down-bg: rgba(255,59,48,0.08);
+    --radius-lg: 20px;
+    --radius-md: 14px;
+    --radius-sm: 10px;
+    --shadow: 0 1px 2px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.04);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
+                 "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+    letter-spacing: -0.01em;
+  }
+
+  .mono {
+    font-family: "SF Mono", ui-monospace, "Menlo", monospace;
+    letter-spacing: 0;
+  }
+
+  header.top {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 32px;
+    background: rgba(245,245,247,0.72);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  header.top h1 {
+    font-size: 1.05rem;
+    font-weight: 600;
+    margin: 0;
+    letter-spacing: -0.015em;
+  }
+
+  header.top h1 span {
+    color: var(--muted);
+    font-weight: 400;
+    margin-left: 10px;
+    font-size: 0.92rem;
+  }
+
+  .last-served {
+    font-size: 0.82rem;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  main {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr;
+    gap: 20px;
+    padding: 28px 32px 80px;
+    max-width: 1120px;
+    margin: 0 auto;
+  }
+
+  @media (max-width: 860px) {
+    main { grid-template-columns: 1fr; padding: 20px 18px 60px; }
+    header.top { padding: 16px 20px; }
+  }
+
+  .col { display: flex; flex-direction: column; gap: 20px; }
+
+  section.panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 26px;
+    box-shadow: var(--shadow);
+  }
+
+  section.panel h2 {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--muted-2);
+    margin: 0 0 18px 0;
+    font-weight: 600;
+  }
+
+  form { display: flex; flex-direction: column; gap: 14px; }
+
+  textarea {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    padding: 14px 16px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    resize: vertical;
+    min-height: 76px;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+
+  textarea::placeholder { color: var(--muted-2); }
+
+  textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: var(--surface);
+    box-shadow: 0 0 0 4px rgba(0,113,227,0.12);
+  }
+
+  button {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 980px;
+    padding: 11px 22px;
+    font-weight: 500;
+    font-size: 0.9rem;
+    cursor: pointer;
+    align-self: flex-start;
+    transition: background 0.15s ease, transform 0.1s ease;
+    font-family: inherit;
+  }
+
+  button:hover { background: var(--accent-hover); }
+  button:active { transform: scale(0.97); }
+  button:disabled { opacity: 0.45; cursor: default; }
+
+  button:focus-visible, textarea:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  button.ghost {
+    background: var(--bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+
+  button.ghost:hover { background: #EBEBEE; }
+
+  .feedback {
+    font-size: 0.82rem;
+    min-height: 16px;
+    color: var(--muted);
+  }
+
+  .feedback.ok { color: var(--ok); }
+  .feedback.err { color: var(--down); }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 600;
+  }
+
+  .badge .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+  }
+
+  .badge.server1 { background: var(--s1-bg); color: var(--s1); }
+  .badge.server1 .dot { background: var(--s1); }
+  .badge.server2 { background: var(--s2-bg); color: var(--s2); }
+  .badge.server2 .dot { background: var(--s2); }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 16px;
+    font-size: 0.86rem;
+  }
+
+  thead th {
+    text-align: left;
+    color: var(--muted-2);
+    font-weight: 600;
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 0 10px 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  tbody td {
+    padding: 12px 10px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover { background: rgba(0,0,0,0.015); }
+
+  .contenido-cell { max-width: 320px; word-break: break-word; }
+
+  .empty-state {
+    color: var(--muted-2);
+    font-size: 0.86rem;
+    padding: 28px 4px;
+    text-align: center;
+  }
+
+  .status-card {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 16px 18px;
+    margin-bottom: 12px;
+    background: var(--bg);
+  }
+
+  .status-card:last-child { margin-bottom: 0; }
+
+  .status-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+
+  .status-name {
+    font-weight: 600;
+    font-size: 0.92rem;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+  }
+
+  .pulse-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .pulse-dot.online { background: var(--ok); }
+  .pulse-dot.offline { background: var(--down); }
+
+  .pulse-dot.online::after {
+    content: "";
+    position: absolute;
+    inset: -5px;
+    border-radius: 50%;
+    background: var(--ok);
+    opacity: 0.3;
+    animation: pulse 2s ease-out infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pulse-dot.online::after { animation: none; }
+  }
+
+  @keyframes pulse {
+    0% { transform: scale(1); opacity: 0.3; }
+    100% { transform: scale(2.6); opacity: 0; }
+  }
+
+  .status-line {
+    font-size: 0.81rem;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+    margin-top: 6px;
+  }
+
+  .status-line b { color: var(--text); font-weight: 500; }
+
+  .status-pill {
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 999px;
+  }
+
+  .status-pill.online { background: var(--ok-bg); color: var(--ok); }
+  .status-pill.offline { background: var(--down-bg); color: var(--down); }
+
+  .hint {
+    font-size: 0.78rem;
+    color: var(--muted-2);
+    margin-top: 16px;
+    line-height: 1.55;
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <h1>Sistema Distribuido <span>Consulta y Registro de Información</span></h1>
+  <div class="last-served" id="lastServed">Esperando actividad…</div>
+</header>
+
+<main>
+  <div class="col">
+
+    <section class="panel">
+      <h2>Registrar información</h2>
+      <form id="formRegistro">
+        <textarea id="contenido" placeholder="Escribe el contenido a registrar…" required></textarea>
+        <button type="submit" id="btnRegistrar">Guardar registro</button>
+        <div class="feedback" id="feedbackRegistro"></div>
+      </form>
+    </section>
+
+    <section class="panel">
+      <h2>Consultar información almacenada</h2>
+      <button class="ghost" id="btnConsultar">Actualizar consulta</button>
+      <div id="tablaWrap"></div>
+    </section>
+
+  </div>
+
+  <div class="col">
+    <section class="panel">
+      <h2>Estado de conexión de cada servidor</h2>
+      <div id="statusServer1" class="status-card">
+        <div class="status-head">
+          <div class="status-name"><span class="pulse-dot offline" id="dot1"></span> Servidor 1</div>
+          <span class="status-pill offline" id="pill1">Consultando…</span>
+        </div>
+        <div class="status-line"><span>Sincronización con el par</span><b id="sync1">—</b></div>
+        <div class="status-line"><span>Última respuesta</span><b id="time1" class="mono">—</b></div>
+      </div>
+      <div id="statusServer2" class="status-card">
+        <div class="status-head">
+          <div class="status-name"><span class="pulse-dot offline" id="dot2"></span> Servidor 2</div>
+          <span class="status-pill offline" id="pill2">Consultando…</span>
+        </div>
+        <div class="status-line"><span>Sincronización con el par</span><b id="sync2">—</b></div>
+        <div class="status-line"><span>Última respuesta</span><b id="time2" class="mono">—</b></div>
+      </div>
+      <p class="hint">Cada tarjeta consulta directamente a ese servidor, sin pasar por el balanceador, por lo que sigue mostrando su estado real incluso si ese nodo está caído.</p>
+    </section>
+  </div>
+</main>
+
+<script>
+  const badge = (serverId) => {
+    if (serverId !== 'server1' && serverId !== 'server2') return '';
+    const label = serverId === 'server1' ? 'Servidor 1' : 'Servidor 2';
+    return `<span class="badge ${serverId}"><span class="dot"></span>${label}</span>`;
+  };
+
+  const setLastServed = (serverId, accion) => {
+    document.getElementById('lastServed').innerHTML =
+      `Última solicitud (${accion}) atendida por ${badge(serverId)}`;
+  };
+
+  // --- Registrar ---
+  const form = document.getElementById('formRegistro');
+  const feedback = document.getElementById('feedbackRegistro');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('btnRegistrar');
+    const contenido = document.getElementById('contenido').value.trim();
+    if (!contenido) return;
+
+    btn.disabled = true;
+    feedback.textContent = 'Enviando…';
+    feedback.className = 'feedback';
+
+    try {
+      const res = await fetch('/registro', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contenido }),
+      });
+      if (!res.ok) throw new Error('Respuesta no válida del servidor');
+      const data = await res.json();
+      const atendioPor = res.headers.get('X-Atendido-Por');
+
+      feedback.innerHTML = `Guardado con id <span class="mono">${data.id.slice(0,8)}…</span>`;
+      feedback.className = 'feedback ok';
+      setLastServed(atendioPor, 'registro');
+      document.getElementById('contenido').value = '';
+      cargarConsulta();
+    } catch (err) {
+      feedback.textContent = 'No se pudo registrar. Verifica que los servidores estén activos.';
+      feedback.className = 'feedback err';
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  // --- Consultar ---
+  const tablaWrap = document.getElementById('tablaWrap');
+
+  async function cargarConsulta() {
+    tablaWrap.innerHTML = '<div class="empty-state">Cargando…</div>';
+    try {
+      const res = await fetch('/consulta');
+      if (!res.ok) throw new Error('Respuesta no válida');
+      const registros = await res.json();
+      const atendioPor = res.headers.get('X-Atendido-Por');
+      setLastServed(atendioPor, 'consulta');
+
+      if (!registros.length) {
+        tablaWrap.innerHTML = '<div class="empty-state">Todavía no hay registros. Crea el primero arriba.</div>';
+        return;
+      }
+
+      const filas = registros.map(r => `
+        <tr>
+          <td class="mono">${r.id.slice(0,8)}…</td>
+          <td class="contenido-cell">${escapeHtml(r.contenido)}</td>
+          <td>${badge(r.origen_servidor)}</td>
+          <td class="mono">${new Date(r.timestamp).toLocaleString()}</td>
+        </tr>
+      `).join('');
+
+      tablaWrap.innerHTML = `
+        <table>
+          <thead>
+            <tr><th>ID</th><th>Contenido</th><th>Origen</th><th>Fecha</th></tr>
+          </thead>
+          <tbody>${filas}</tbody>
+        </table>
+      `;
+    } catch (err) {
+      tablaWrap.innerHTML = '<div class="empty-state">No se pudo consultar la información.</div>';
+    }
+  }
+
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  document.getElementById('btnConsultar').addEventListener('click', cargarConsulta);
+
+  // --- Estado de cada servidor ---
+  async function consultarEstado(serverId, dotEl, pillEl, syncEl, timeEl) {
+    try {
+      const res = await fetch(`/status/${serverId}`, { cache: 'no-store' });
+      if (!res.ok) throw new Error('offline');
+      const data = await res.json();
+
+      dotEl.className = 'pulse-dot online';
+      pillEl.className = 'status-pill online';
+      pillEl.textContent = 'En línea';
+      syncEl.textContent = data.peer_connected ? 'Conectada' : 'Caída';
+      syncEl.style.color = data.peer_connected ? 'var(--ok)' : 'var(--down)';
+      timeEl.textContent = new Date().toLocaleTimeString();
+    } catch (err) {
+      dotEl.className = 'pulse-dot offline';
+      pillEl.className = 'status-pill offline';
+      pillEl.textContent = 'Sin respuesta';
+      syncEl.textContent = '—';
+      syncEl.style.color = 'var(--muted)';
+      timeEl.textContent = new Date().toLocaleTimeString();
+    }
+  }
+
+  function refrescarEstados() {
+    consultarEstado('server1',
+      document.getElementById('dot1'), document.getElementById('pill1'),
+      document.getElementById('sync1'), document.getElementById('time1'));
+    consultarEstado('server2',
+      document.getElementById('dot2'), document.getElementById('pill2'),
+      document.getElementById('sync2'), document.getElementById('time2'));
+  }
+
+  refrescarEstados();
+  cargarConsulta();
+  setInterval(refrescarEstados, 4000);
+</script>
+
+</body>
+</html>
