@@ -144,17 +144,3 @@ docker compose start server2         # server2 vuelve
 # unos segundos después, server1 detecta la reconexión y vacía su cola:
 # el registro aparece también en server2 sin intervención manual
 ```
-
-## Relación con las preguntas orientadoras de la guía
-
-- **Disponibilidad ante fallo de un nodo**: si un servidor cae, el otro
-  sigue respondiendo consultas y aceptando registros nuevos (aunque Nginx,
-  en este demo, seguirá intentando enviarle tráfico al caído; en producción
-  se añadiría un healthcheck activo en el `upstream` de Nginx).
-- **Coherencia eventual**: no hay bloqueo ni consenso fuerte entre los dos
-  nodos; cada uno acepta escrituras locales de inmediato y propaga el
-  cambio de forma asíncrona. Es un modelo de consistencia eventual, no de
-  consistencia fuerte.
-- **Recuperación tras fallo**: la cola de pendientes es justamente el
-  mecanismo que evita perder datos escritos mientras el otro nodo estaba
-  inalcanzable.
